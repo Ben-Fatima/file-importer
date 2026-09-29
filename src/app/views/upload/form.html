@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>File Importer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-slate-100 flex items-center justify-center">
+    <div class="w-full max-w-2xl bg-white shadow-md rounded-lg p-6 space-y-6">
+      <header class="space-y-1">
+        <h1 class="text-2xl font-semibold text-slate-800">Upload CSV</h1>
+        <p class="text-xs text-slate-300 italic">
+          Select a CSV file to upload. The file will be sent in chunks, then
+          imported.
+        </p>
+      </header>
+
+      <!-- Upload section -->
+      <section class="space-y-4">
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-slate-700">
+            CSV file
+          </label>
+          <input
+            id="file-input"
+            type="file"
+            accept=".csv,text/csv"
+            class="block w-full text-sm text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-800 file:text-white hover:file:bg-indigo-700"
+          />
+          <p id="file-info" class="text-xs text-slate-500"></p>
+        </div>
+      </section>
+
+      <!-- Upload progress -->
+      <section class="space-y-2">
+        <h2 class="text-sm font-semibold text-slate-700">Upload progress</h2>
+        <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+          <div id="upload-progress-bar" class="h-2 bg-violet-800 w-0"></div>
+        </div>
+        <p id="upload-status" class="text-xs text-slate-500">
+          Waiting for file…
+        </p>
+      </section>
+
+      <!-- Import progress -->
+      <section class="space-y-2">
+        <h2 class="text-sm font-semibold text-slate-700">Import progress</h2>
+        <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+          <div id="import-progress-bar" class="h-2 bg-emerald-600 w-0"></div>
+        </div>
+        <p id="import-status" class="text-xs text-slate-500">
+          Not started yet.
+        </p>
+      </section>
+
+      <!-- Messages / errors -->
+      <section class="space-y-2 text-sm">
+        <p id="messages" class="text-slate-700"></p>
+        <div id="errors" class="space-y-2"></div>
+      </section>
+      <a
+        id="products-link"
+        href="/products?page=1"
+        class="inline-flex items-center justify-center mt-2 px-4 py-2 rounded-md border border-indigo-800 text-indigo-800 text-sm font-semibold hover:bg-indigo-700 hover:text-white"
+      >
+        View products
+      </a>
+    </div>
+    <script type="module" src="/assets/app.js"></script>
+  </body>
+</html>

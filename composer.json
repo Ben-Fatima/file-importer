@@ -1,0 +1,17 @@
+{
+  "name": "fatima/file-importer",
+  "type": "project",
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/app/",
+      "Core\\": "src/core/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Ben-Fatima",
+      "email": "fatimazahranit@gmail.com"
+    }
+  ],
+  "require": {}
+}
