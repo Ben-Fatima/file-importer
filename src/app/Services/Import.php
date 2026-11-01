@@ -92,20 +92,29 @@ class Import {
 
     $this->ensureCanRun($import);
     $filePath = $this->buildAbsolutePath($import);
-    $handle = $this->openFileAtProgress($filePath, (int)$import['bytes_processed']);
-    
-    if (!$handle) {
+
+    $lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+    if ($lines === false) {
       throw new \Exception("Failed to open file at path {$filePath}.");
+    }
+
+    $headers = str_getcsv(array_shift($lines));
+
+    if (!$headers || !$this->validateHeaders($headers)) {
+      throw new \Exception('Invalid file format');
     }
 
     $created = 0;
     $updated = 0;
     $failed  = 0;
-    $rowsThisChunk = 0;
     $errors = [];
 
-    $bytesProcessed     = (int)$import['bytes_processed'];
+    $totalRows          = count($lines);
     $processedRowsTotal = (int)$import['processed_rows'];
+    $fileSize           = filesize($filePath);
+
+    $chunk = array_slice($lines, $processedRowsTotal, $maxRows);
 
     $transactionStarted = false;
 
@@ -115,11 +124,11 @@ class Import {
         $transactionStarted = true;
       }
 
-      while ($rowsThisChunk < $maxRows && !feof($handle)) {
-        $row = fgetcsv($handle);
+      foreach ($chunk as $line) {
+        $row = str_getcsv($line);
 
-        if ($row === false || $row === []) {
-          break; 
+        if ($row === null || $row === false || $row === []) {
+          continue;
         }
 
         $rowResult = $this->processRow($row, $importId,$processedRowsTotal + 1);
@@ -139,13 +148,14 @@ class Import {
           break;
         }
 
-        $bytesProcessed = ftell($handle);
         $processedRowsTotal++;
-        $rowsThisChunk++;
       }
 
-      $finished = feof($handle);
-      fclose($handle);
+      $finished = $processedRowsTotal >= $totalRows;
+      $bytesProcessed = $finished
+        ? $fileSize
+        : (int)($fileSize * $processedRowsTotal / max($totalRows, 1));
+
       $this->updateImportProgress(
         $importId,
         $bytesProcessed,
@@ -171,10 +181,6 @@ class Import {
 
       if ($transactionStarted && $this->db->inTransaction()) {
         $this->db->rollBack();
-      }
-
-      if (is_resource($handle)) {
-        fclose($handle);
       }
       throw $e;
     }
@@ -219,43 +225,6 @@ class Import {
   private function buildAbsolutePath(array $import): string
   {
     return $this->path . '/' . $import['file_path'];
-  }
-
-  /**
-   * Open file handle positioned at the right place.
-   * Handles skipping the header if bytes_processed == 0.
-   *
-   * @param string $path CSV file path.
-   * @param int    $bytesProcessed Previously processed byte offset.
-   * @return resource|false File handle or false on failure.
-   *
-   * @throws \Exception When headers are invalid.
-   */
-  private function openFileAtProgress(string $path, int $bytesProcessed): mixed
-  {
-    $handle = fopen($path, 'r');
-
-    if ($handle === false) {
-      return false;  
-    }
-
-    if ($bytesProcessed > 0) {
-
-      if (fseek($handle, $bytesProcessed) !== 0) {
-        fclose($handle);
-        return false;
-      }
-
-    } else {
-      $headers = fgetcsv($handle);
-
-      if ($headers === false || !$this->validateHeaders($headers)) {
-        fclose($handle);
-        throw new \Exception('Invalid file format');
-      }
-    }
-
-  return $handle;
   }
 
   /**
