@@ -127,14 +127,16 @@ class ProductRepository
   }
 
   /**
-   * Retrieve a paginated list of products.
+   * Retrieve the next page of products after a given id (keyset/cursor pagination).
    *
-   * @param int $limit  Number of records to retrieve.
-   * @param int $offset Offset to start retrieving records from.
+   * @param int $limit   Number of records to retrieve.
+   * @param int $afterId Only rows with id greater than this are returned (0 = first page).
    * @return array List of associative product rows.
    */
-  public function paginate(int $limit, int $offset): array
+  public function paginateAfter(int $limit, int $afterId): array
   {
-    return $this->products->get($limit, $offset, 'id', 'ASC');
+    return $this->products
+      ->where('id', '>', $afterId)
+      ->get($limit, 0, 'id', 'ASC');
   }
 }

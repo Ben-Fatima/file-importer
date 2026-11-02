@@ -13,7 +13,7 @@
       <header class="flex items-end justify-between gap-4">
         <div>
           <h1 class="text-2xl font-semibold text-slate-800">Products</h1>
-          <p class="text-xs text-slate-400">Page <?= (int)$page ?> · <?= (int)$perPage ?> per page</p>
+          <p class="text-xs text-slate-400"><?= $afterId > 0 ? 'After #' . (int)$afterId : 'First page' ?> · <?= (int)$perPage ?> per page</p>
         </div>
         <a href="/upload" class="text-sm text-indigo-700 hover:underline">Back to upload</a>
       </header>
@@ -53,22 +53,20 @@
 
       <nav class="flex items-center justify-between pt-2">
         <div class="flex items-center gap-2">
-          <?php if ($hasPrev): ?>
+          <?php if ($afterId > 0): ?>
             <a
-              href="/products?page=<?= (int)($page - 1) ?>"
+              href="/products"
               class="px-3 py-2 text-sm rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
-            >Previous</a>
-          <?php else: ?>
-            <span class="px-3 py-2 text-sm rounded-md border border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed">Previous</span>
+            >First</a>
           <?php endif; ?>
 
           <span class="px-3 py-2 text-sm rounded-md bg-slate-100 text-slate-700">
-            Page <?= (int)$page ?>
+            <?= $afterId > 0 ? 'After #' . (int)$afterId : 'First page' ?>
           </span>
 
           <?php if ($hasNext): ?>
             <a
-              href="/products?page=<?= (int)($page + 1) ?>"
+              href="/products?after=<?= (int)$nextCursor ?>"
               class="px-3 py-2 text-sm rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
             >Next</a>
           <?php else: ?>

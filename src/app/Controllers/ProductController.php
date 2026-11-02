@@ -34,18 +34,17 @@ class ProductController extends Controller
   public function index(): void 
   {
     $perPage = 50;
-    $page = max(1, (int)($_GET['page'] ?? 1));
-    $offset = ($page - 1) * $perPage;
-    $data = $this->products->paginate($perPage, $offset);
-    $hasPrev = $page > 1;
+    $afterId = max(0, (int)($_GET['after'] ?? 0));
+    $data = $this->products->paginateAfter($perPage, $afterId);
+    $nextCursor = !empty($data) ? (int)end($data)['id'] : 0;
     $hasNext = count($data) === $perPage;
 
     $this->render('products/index', [
-      'products' => $data,
-      'page'     => $page,
-      'perPage'  => $perPage,
-      'hasPrev'  => $hasPrev,
-      'hasNext'  => $hasNext,
+      'products'   => $data,
+      'afterId'    => $afterId,
+      'perPage'    => $perPage,
+      'nextCursor' => $nextCursor,
+      'hasNext'    => $hasNext,
     ]);
   }
 }
