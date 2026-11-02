@@ -1,0 +1,5 @@
+# memory check — before: whole-file read with file()
+php -d memory_limit=-1 -r '$l = file("storage/big_products.csv"); echo count($l), " lines, ", round(memory_get_peak_usage(true)/1048576), " MB";'
+
+# memory check — after: streaming read with fgetcsv
+php -r '$h = fopen("storage/big_products.csv", "r"); $n = 0; while (fgetcsv($h)) $n++; fclose($h); echo $n, " rows, ", round(memory_get_peak_usage(true)/1048576), " MB";'
