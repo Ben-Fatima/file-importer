@@ -1,0 +1,11 @@
+# before — page 20,000 the offset way: reads a million rows to throw them away
+sqlite3 storage/file_importer.sqlite ".timer on" "select * from products order by id limit 50 offset 1000000;"
+
+# after — the same page by cursor: jump straight past id one million
+sqlite3 storage/file_importer.sqlite ".timer on" "select * from products where id > 1000000 order by id limit 50;"
+
+# HTTP-level — page 20,000 end to end (before)
+curl -s -o /dev/null -w "%{time_total}\n" "localhost:8000/products?page=20000"
+
+# HTTP-level — the same deep page by cursor (after)
+curl -s -o /dev/null -w "%{time_total}\n" "localhost:8000/products?after=1000000"
